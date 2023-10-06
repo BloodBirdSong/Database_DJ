@@ -13,11 +13,11 @@
 <div class="text-danger">
   SHOW ALL OF THE SONGS IN THIS PLAYLIST HERE
 
-  {% for song in songs %}
-    {% if song.playlist_id ==  playlist.id %}
-        <li class="list-group-item"><a href="/songs/{{song.id}}">{{song.title}}</a>By {{song.artist}}</li>
-    {% endif %}
-  {% endfor %}
+<ul>
+{% for song in songs %}
+  <li><a href="/songs/{{song.id}}">{{ song.title }} By {{song.artist}}</a></li>
+{% endfor %}
+</ul>
 </div>
 
 <p>

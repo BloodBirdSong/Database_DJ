@@ -52,7 +52,15 @@ def show_all_playlists():
 def show_playlist(playlist_id):
     """Show detail on specific playlist."""
     playlist = Playlist.query.get_or_404(playlist_id)
-    return render_template("playlist.html", playlist=playlist)
+    playlist_songs = PlaylistSong.query.all()
+
+    songs_in_playlist=[]
+    for playlist_song in playlist_songs:
+        if (playlist_song.playlist_id == playlist_id):
+            songs_in_playlist.append(Song.query.get_or_404(playlist_song.song_id))
+            
+            
+    return render_template("playlist.html", playlist=playlist, songs= songs_in_playlist)
 
 
 @app.route("/playlists/add", methods=["GET", "POST"])
@@ -91,7 +99,14 @@ def show_song(song_id):
     """return a specific song"""
 
     song = Song.query.get_or_404(song_id)
-    return render_template("song.html", song=song)
+    playlist_songs = PlaylistSong.query.all()
+    
+    playlists_with_song = []
+    for playlist_song in playlist_songs:
+        if (playlist_song.song_id == song_id):
+            playlists_with_song.append(Playlist.query.get_or_404(playlist_song.playlist_id))
+
+    return render_template("song.html", song=song, playlists=playlists_with_song)
 
 
 @app.route("/songs/add", methods=["GET", "POST"])
@@ -118,62 +133,22 @@ def add_song():
 @app.route("/playlists/<int:playlist_id>/add-song", methods=["GET", "POST"])
 def add_song_to_playlist(playlist_id):
     """Add a playlist and redirect to list."""
-    app.logger.info("HERE")
     playlist = Playlist.query.get_or_404(playlist_id)
-    
-    # app.logger.info(type(playlist))
-    # app.logger.info(playlist)
-    # app.logger.info(playlist.name)
-    # app.logger.info(playlist.description)
-    
-    app.logger.info("HERE2")
-
     form = NewSongForPlaylistForm()
     playlist_songs = PlaylistSong.query.all()   
     songs = Song.query.all()    
-    # for song in songs:
-    #     app.logger.info(type(song))
-    #     app.logger.info(song)
-    #     app.logger.info(song.id)
-    #     app.logger.info(song.title)
-    #     app.logger.info(song.artist)
-
-    app.logger.info("HERE3")
-
-    # Restrict form to songs not already on this playlist
-
-    curr_on_playlist = []
-    
-    app.logger.info(curr_on_playlist)
-    form.song.choices = (db.session.query(Song.id, Song.title).filter(Song.id.notin_(curr_on_playlist)).all())
 
     if form.is_submitted():
         selected_song_id = request.form["songs"]
-        app.logger.info(selected_song_id)
-        app.logger.info(selected_song_id.title)
-        app.logger.info("FORLOOP")
         # check for doops
         for playlist_song in playlist_songs:
-            app.logger.info(selected_song_id)
-            app.logger.info(playlist_song.song_id)
-            app.logger.info(type(int(selected_song_id)))
-            app.logger.info(type(playlist_song.song_id))
-            
-            app.logger.info(playlist_id)
-            app.logger.info(playlist_song.playlist_id)
-            app.logger.info("LOOP")
-
             if (playlist_song.playlist_id == playlist_id) and (playlist_song.song_id == int(selected_song_id)):
-                app.logger.info("MATCH")
                 return render_template("add_song_to_playlist.html", playlist=playlist, songs=songs,form=form)
-                # curr_on_playlist.append(song)
         new = PlaylistSong(song_id=selected_song_id, playlist_id=playlist_id)
-        app.logger.info("NEW SONG")
-        app.logger.info(new)
         db.session.add(new)
         db.session.commit()
         
-        # return redirect(f"/playlists/{playlist_id}")
+        return redirect(f"/playlists/{playlist_id}")
 
 
 
