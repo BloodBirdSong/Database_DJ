@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Add a form that when submitted creates a new playlist!</h1>
+
+  <form method="POST">
+    {% for msg in get_flashed_messages() %}
+    <div>{{ msg }}</div>
+    {% endfor %}
+
+    {{ form.hidden_tag() }}
+    {% include "_form.html" %}
+
+    <button type="submit">Submit</button>
+  </form>
+
+
+{% endblock %}
